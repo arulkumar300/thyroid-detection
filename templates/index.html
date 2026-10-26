@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThyroScan AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #f0ede8;
+            --card-color: #ffffff;
+            --green-accent: #1a6b55;
+            --dark-green: #0f4338;
+            --orange: #c75b2a;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --border-color: #e5e5e5;
+            --blue-hypo: #2563eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        h1, h2, h3, h4, .serif-font {
+            font-family: 'DM Serif Display', serif;
+        }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--dark-green);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-header {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            color: var(--dark-green);
+            margin-bottom: 1rem;
+        }
+
+        .accuracy-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(26, 107, 85, 0.1);
+            color: var(--green-accent);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .blinking-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--green-accent);
+            border-radius: 50%;
+            animation: blink 1.5s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-color);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-green);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards & Form */
+        .card {
+            background: var(--card-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-green);
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-text:focus {
+            outline: none;
+            border-color: var(--green-accent);
+            box-shadow: 0 0 0 3px rgba(26, 107, 85, 0.1);
+        }
+
+        /* Toggle Buttons */
+        .toggle-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-muted);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--green-accent);
+            color: white;
+            border-color: var(--green-accent);
+        }
+
+        .toggle-btn.active.no-btn {
+            background-color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        /* Hormone Input Group */
+        .hormone-group {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .hormone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .hormone-title {
+            font-weight: bold;
+            color: var(--dark-green);
+        }
+
+        .hormone-input-container {
+            display: none;
+            margin-top: 0.75rem;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--dark-green);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--green-accent);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--dark-green);
+            border: 1px solid var(--dark-green);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(15, 67, 56, 0.05);
+        }
+
+        /* Loader */
+        .loader-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            margin-top: 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(26, 107, 85, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--green-accent);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            color: var(--dark-green);
+            font-weight: 500;
+            font-size: 1.125rem;
+        }
+
+        /* Result Card */
+        .result-card {
+            display: none;
+            margin-top: 2rem;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            color: white;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card.euthyroid {
+            background: linear-gradient(135deg, var(--green-accent), var(--dark-green));
+        }
+
+        .result-card.hypothyroid {
+            background: linear-gradient(135deg, #3b82f6, var(--blue-hypo));
+        }
+
+        .result-card.hyperthyroid {
+            background: linear-gradient(135deg, #f97316, var(--orange));
+        }
+
+        .result-header {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .result-title {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .confidence-section {
+            margin-bottom: 2rem;
+        }
+
+        .confidence-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .progress-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 9999px;
+            width: 0;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .disclaimer {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1rem;
+        }
+
+        .btn-download {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+        }
+
+        .btn-download:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .result-card {
+                color: black !important;
+                background: white !important;
+                border: 2px solid #ccc;
+                box-shadow: none;
+            }
+            .progress-bg {
+                background: #eee;
+            }
+            .progress-bar {
+                background: var(--dark-green);
+            }
+            .btn-download {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="no-print">
+        <div class="logo serif-font">ThyroScan AI 🫀</div>
+        <div class="badge-header">98.38% Accuracy</div>
+    </header>
+
+    <div class="container">
+        <div class="hero no-print">
+            <div class="accuracy-pill">
+                <div class="blinking-dot"></div>
+                LIVE SYSTEM ACTIVE
+            </div>
+            <h1>AI-Powered Thyroid Disease Prediction</h1>
+            <p style="color: var(--text-muted); font-size: 1.125rem; max-width: 600px; margin: 0 auto;">
+                Enter patient clinical and biochemical data below to generate an instant diagnostic prediction using our validated machine learning model.
+            </p>
+        </div>
+
+        <div class="stats-bar no-print">
+            <div class="stat-item">
+                <span class="stat-label">Accuracy</span>
+                <span class="stat-value">98.38%</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Precision</span>
+                <span class="stat-value">0.9921</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">F1-Score</span>
+                <span class="stat-value">0.9931</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">AUC-ROC</span>
+                <span class="stat-value">0.99</span>
+            </div>
+        </div>
+
+        <form id="predictionForm" class="no-print">
+            <div class="main-grid">
+                <!-- Left Column -->
+                <div class="card">
+                    <h2 class="card-title">Clinical History</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Age</label>
+                        <input type="number" id="age" class="input-text" placeholder="e.g. 45" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Sex</label>
+                        <div class="toggle-group" data-id="sex">
+                            <button type="button" class="toggle-btn active" data-val="F">Female</button>
+                            <button type="button" class="toggle-btn" data-val="M">Male</button>
+                        </div>
+                    </div>
+
+                    <!-- Yes/No Toggles -->
+                    <div id="clinicalToggles">
+                        <!-- Dynamically generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="card">
+                    <h2 class="card-title">Hormone Panel</h2>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                        Toggle 'Yes' if the measurement is available and enter the value. Otherwise, leave as 'No'.
+                    </p>
+
+                    <div id="hormonePanel">
+                        <!-- Dynamically generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" onclick="resetForm()">Reset</button>
+                <button type="submit" class="btn btn-primary">Predict Thyroid Status</button>
+            </div>
+        </form>
+
+        <!-- Loader -->
+        <div id="loader" class="loader-container no-print">
+            <div class="spinner"></div>
+            <div class="loader-text">Analyzing clinical data…</div>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultCard" class="result-card">
+            <button type="button" class="btn-download no-print" onclick="downloadResultPDF()">Download PDF</button>
+            <div class="result-header mono-font">PREDICTION RESULT</div>
+            <div class="result-title serif-font" id="resultDiagnosis">Euthyroid</div>
+            
+            <div class="confidence-section">
+                <div class="confidence-label">
+                    <span>Model Confidence</span>
+                    <span class="mono-font" id="resultConfidence">0%</span>
+                </div>
+                <div class="progress-bg">
+                    <div class="progress-bar" id="resultProgressBar"></div>
+                </div>
+            </div>
+            
+            <div class="disclaimer">
+                ⚠️ This is AI-assisted, not a medical diagnosis. The result is generated by a machine learning model based on the provided inputs. Please consult a qualified healthcare professional for clinical decisions.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const clinicalFields = [
+            { id: 'on_thyroxine', label: 'On Thyroxine' },
+            { id: 'query_on_thyroxine', label: 'Query On Thyroxine' },
+            { id: 'on_antithyroid_medication', label: 'On Antithyroid Meds' },
+            { id: 'sick', label: 'Sick' },
+            { id: 'pregnant', label: 'Pregnant' },
+            { id: 'thyroid_surgery', label: 'Thyroid Surgery' },
+            { id: 'I131_treatment', label: 'I131 Treatment' },
+            { id: 'query_hypothyroid', label: 'Query Hypothyroid' },
+            { id: 'query_hyperthyroid', label: 'Query Hyperthyroid' },
+            { id: 'lithium', label: 'Lithium' },
+            { id: 'goitre', label: 'Goitre' },
+            { id: 'tumor', label: 'Tumor' },
+            { id: 'hypopituitary', label: 'Hypopituitary' },
+            { id: 'psych', label: 'Psych' }
+        ];
+
+        const hormoneFields = [
+            { id: 'TSH', label: 'TSH' },
+            { id: 'T3', label: 'T3' },
+            { id: 'TT4', label: 'TT4' },
+            { id: 'T4U', label: 'T4U' },
+            { id: 'FTI', label: 'FTI' }
+        ];
+
+        // Store selected values
+        const formState = {
+            sex: 'F'
+        };
+
+        // Initialize Clinical Toggles
+        const clinicalContainer = document.getElementById('clinicalToggles');
+        clinicalFields.forEach(field => {
+            formState[field.id] = 'No'; // default
+            const div = document.createElement('div');
+            div.className = 'form-group';
+            div.innerHTML = `
+                <label class="form-label">${field.label}</label>
+                <div class="toggle-group" data-id="${field.id}">
+                    <button type="button" class="toggle-btn no-btn active" data-val="No">No</button>
+                    <button type="button" class="toggle-btn" data-val="Yes">Yes</button>
+                </div>
+            `;
+            clinicalContainer.appendChild(div);
+        });
+
+        // Initialize Hormone Panel
+        const hormoneContainer = document.getElementById('hormonePanel');
+        hormoneFields.forEach(field => {
+            formState[`measured_${field.id}`] = 'No';
+            const div = document.createElement('div');
+            div.className = 'hormone-group';
+            div.innerHTML = `
+                <div class="hormone-header">
+                    <span class="hormone-title">${field.label}</span>
+                    <div class="toggle-group" style="width: 150px" data-id="measured_${field.id}">
+                        <button type="button" class="toggle-btn no-btn active" data-val="No">No</button>
+                        <button type="button" class="toggle-btn" data-val="Yes">Yes</button>
+                    </div>
+                </div>
+                <div class="hormone-input-container" id="container_${field.id}">
+                    <input type="number" step="any" id="${field.id}" class="input-text" placeholder="Enter ${field.label} value">
+                </div>
+            `;
+            hormoneContainer.appendChild(div);
+        });
+
+        // Handle Toggle Clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-btn')) {
+                const group = e.target.closest('.toggle-group');
+                const id = group.getAttribute('data-id');
+                const val = e.target.getAttribute('data-val');
+
+                // Update UI
+                group.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+
+                // Update State
+                formState[id] = val;
+
+                // Toggle hormone input visibility
+                if (id.startsWith('measured_')) {
+                    const hormoneId = id.replace('measured_', '');
+                    const container = document.getElementById(`container_${hormoneId}`);
+                    if (val === 'Yes') {
+                        container.style.display = 'block';
+                    } else {
+                        container.style.display = 'none';
+                        document.getElementById(hormoneId).value = ''; // clear value
+                    }
+                }
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('predictionForm').reset();
+            // Reset all toggles to 'No' or default
+            document.querySelectorAll('.toggle-group').forEach(group => {
+                const id = group.getAttribute('data-id');
+                const buttons = group.querySelectorAll('.toggle-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                
+                if (id === 'sex') {
+                    buttons[0].classList.add('active');
+                    formState[id] = 'F';
+                } else {
+                    const noBtn = group.querySelector('[data-val="No"]');
+                    if (noBtn) {
+                        noBtn.classList.add('active');
+                        formState[id] = 'No';
+                    }
+                }
+            });
+            // Hide all hormone inputs
+            hormoneFields.forEach(field => {
+                document.getElementById(`container_${field.id}`).style.display = 'none';
+            });
+            document.getElementById('resultCard').style.display = 'none';
+        }
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const age = document.getElementById('age').value;
+            if (!age) {
+                alert("Please enter age");
+                return;
+            }
+
+            const payload = {
+                age: age,
+                sex: formState.sex
+            };
+
+            clinicalFields.forEach(field => {
+                payload[field.id] = formState[field.id];
+            });
+
+            hormoneFields.forEach(field => {
+                if (formState[`measured_${field.id}`] === 'Yes') {
+                    payload[field.id] = document.getElementById(field.id).value || 0;
+                } else {
+                    payload[field.id] = 0;
+                }
+            });
+
+            // UI transitions
+            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const response = await fetch('http://localhost:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error');
+                }
+
+                showResult(data.diagnosis, data.confidence);
+                
+            } catch (err) {
+                alert("Error during prediction: " + err.message);
+                document.getElementById('loader').style.display = 'none';
+            }
+        });
+
+        function showResult(diagnosis, confidence) {
+            document.getElementById('loader').style.display = 'none';
+            const card = document.getElementById('resultCard');
+            const diagnosisEl = document.getElementById('resultDiagnosis');
+            const confidenceEl = document.getElementById('resultConfidence');
+            const progressEl = document.getElementById('resultProgressBar');
+            
+            card.style.display = 'block';
+            card.className = 'result-card ' + diagnosis.toLowerCase(); // Set color class
+            
+            diagnosisEl.textContent = diagnosis;
+            const pct = (confidence * 100).toFixed(1) + '%';
+            confidenceEl.textContent = pct;
+            
+            // Animation for progress bar
+            setTimeout(() => {
+                progressEl.style.width = pct;
+            }, 100);
+            
+            // Scroll to result
+            card.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        function downloadResultPDF() {
+            const element = document.getElementById('resultCard');
+            const btn = element.querySelector('.btn-download');
+            
+            // Temporarily hide the button from the PDF
+            btn.style.display = 'none';
+
+            const opt = {
+                margin:       0.5,
+                filename:     'ThyroScan_Result.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restore the button after download
+                btn.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
